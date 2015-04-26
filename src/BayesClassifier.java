@@ -121,7 +121,7 @@ public class BayesClassifier extends Classifier {
 		double[][] values = output == 0 ? featureValues0 : featureValues1;
 
 		for (double[] row : values) {
-			if (row[index] == value)
+			if (row[index+1] == value)
 				total++;
 		}
 
@@ -139,6 +139,7 @@ public class BayesClassifier extends Classifier {
 //		System.out.println();
 		
 		int count = 1;
+		int correct = 0;
 
 		while (file.hasNextLine()) {
 			String[] line = file.nextLine().split("\\s+");
@@ -152,27 +153,39 @@ public class BayesClassifier extends Classifier {
 			double p0 = output0P;
 			double p1 = 1 - output0P;
 
-			// System.out.print(p0 + " " + p1 + " ");
+			 //System.out.print(p0 + " " + p1 + " ");
+			
+			
 
 			for (int i = 0; i < features.size(); i++) {
+				//System.out.print(values[i+1] + " ");
+				//System.out.println(i + " " + calculateProbability(i, values[i+1], 0));
 				p0 *= calculateProbability(i, values[i+1], 0);
 				p1 *= calculateProbability(i, values[i+1], 1);
 			}
 
-			// System.out.print(p0 + " " + p1 + " ");
+			 //System.out.print(p0 + " " + p1 + " ");
 
 			String out = p0 > p1 ? output[0] : output[1];
 			System.out.println(count + " " + out);
+			if(out.equals(data.output))
+				correct++;
 			count++;
 		}
 
+		System.out.println((double)correct/(count-1));
+		
 	}
 
 	public double calculateProbability(int i, double value, int output) {
 		if (features.get(i).isNumeric()) {
-			double[] mv = getMeanVariance(i, output);
+			//System.out.print(features.get(i).name + " " + value + " ");
+			double[] mv = getMeanVariance(i+1, output);
+			//System.out.print("mean: " + mv[0] + " variance: " + mv[1]);
 			double pow = -(Math.pow(value - mv[0], 2)) / (2 * mv[1]);
-			return (Math.pow(1, pow) / Math.sqrt((2 * Math.PI * mv[1])));
+			double prob = (Math.pow(1, pow) / Math.sqrt((2 * Math.PI * mv[1])));
+			//System.out.println(" " + prob);
+			return prob;
 		}
 
 		return findProbability(i, value, output);

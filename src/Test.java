@@ -6,9 +6,8 @@ public class Test {
 	public static void main(String[] args) throws FileNotFoundException {
 		CustomClassifier tester = new CustomClassifier("trainingData/census.names");
 		//BayesClassifier tester = new BayesClassifier("trainingData/census.names");
-		System.out.println();
-		tester.train("trainingData/censusShort.train");
-		tester.makePredictions("trainingData/censusShort.predict");
+		tester.train("trainingData/census.train");
+		tester.makePredictions("trainingData/censusShort.train");
 	}
 	
 }
