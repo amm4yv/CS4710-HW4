@@ -6,6 +6,7 @@ public class FeatureHeader {
 	String name;
 	private boolean numeric;
 	String[] values;
+	double[] probabilities;
 	
 	public FeatureHeader(String[] data) {
 		this.name = data[0];
