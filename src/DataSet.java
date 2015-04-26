@@ -11,12 +11,15 @@ public class DataSet {
 	public DataSet(String[] input, ArrayList<FeatureHeader> features,
 			String[] output) {
 		this.data = new HashMap<FeatureHeader, String>();
-		this.matrix = new double[input.length - 1];
+		this.matrix = new double[input.length];
 		this.outputIndex = new double[1];
+		
+		//bias
+		this.matrix[0] = 1;
 
 		for (int i = 0; i < input.length - 1; i++) {
 			this.data.put(features.get(i), input[i]);
-			matrix[i] = features.get(i).find(input[i]);
+			matrix[i+1] = features.get(i).find(input[i]);
 		}
 
 		this.output = input[input.length - 1];
