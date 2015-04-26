@@ -155,8 +155,8 @@ public class BayesClassifier extends Classifier {
 			// System.out.print(p0 + " " + p1 + " ");
 
 			for (int i = 0; i < features.size(); i++) {
-				p0 *= calculateProbability(i, values[i], 0);
-				p1 *= calculateProbability(i, values[i], 1);
+				p0 *= calculateProbability(i, values[i+1], 0);
+				p1 *= calculateProbability(i, values[i+1], 1);
 			}
 
 			// System.out.print(p0 + " " + p1 + " ");

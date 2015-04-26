@@ -84,19 +84,19 @@ public class CustomClassifier extends Classifier {
 			//System.out.println();
 		}
 
-		double[][] test = {
-				{ 60.0, 2.0, 4.0, 9.0, 1.0, 5.0, 3.0, 1.0, 2.0, 0.0, 0.0, 50.0,
-						1.0 },
-				{ 28.0, 0.0, 1.0, 10.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-						40.0, 0.0 },
-				{ 46.0, 4.0, 1.0, 10.0, 0.0, 12.0, 2.0, 0.0, 1.0, 0.0, 0.0,
-						40.0, 0.0 },
-				{ 52.0, 0.0, 0.0, 13.0, 0.0, 4.0, 2.0, 0.0, 1.0, 15024.0, 0.0,
-						45.0, 0.0 },
-				{ 52.0, 0.0, 0.0, 13.0, 0.0, 4.0, 2.0, 0.0, 1.0, 0.0, 0.0,
-						40.0, 0.0 },
-				{ 28.0, 0.0, 3.0, 9.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 0.0, 45.0,
-						0.0 } };
+//		double[][] test = {
+//				{ 60.0, 2.0, 4.0, 9.0, 1.0, 5.0, 3.0, 1.0, 2.0, 0.0, 0.0, 50.0,
+//						1.0 },
+//				{ 28.0, 0.0, 1.0, 10.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+//						40.0, 0.0 },
+//				{ 46.0, 4.0, 1.0, 10.0, 0.0, 12.0, 2.0, 0.0, 1.0, 0.0, 0.0,
+//						40.0, 0.0 },
+//				{ 52.0, 0.0, 0.0, 13.0, 0.0, 4.0, 2.0, 0.0, 1.0, 15024.0, 0.0,
+//						45.0, 0.0 },
+//				{ 52.0, 0.0, 0.0, 13.0, 0.0, 4.0, 2.0, 0.0, 1.0, 0.0, 0.0,
+//						40.0, 0.0 },
+//				{ 28.0, 0.0, 3.0, 9.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 0.0, 45.0,
+//						0.0 } };
 
 		// System.out.println(theta.getArray().length);
 
@@ -106,10 +106,10 @@ public class CustomClassifier extends Classifier {
 		//
 		// double result = getCost(a);
 		//
-		double result = 1 / (1 + Math
-				.pow(Math.E, -(dotProduct(theta, test[0]))));
-		System.out.println(result);
-		System.out.println(getHx(test[1]));
+//		double result = 1 / (1 + Math
+//				.pow(Math.E, -(dotProduct(theta, test[0]))));
+//		System.out.println(result);
+		//System.out.println(getHx(test[1]));
 		//
 		// theta[a] -= result;
 		//
@@ -125,23 +125,24 @@ public class CustomClassifier extends Classifier {
 			double[] newTheta = new double[theta.length];
 			for (int i = 0; i < theta.length; i++) {
 				double change = getCost(i);
-				newTheta[i] = theta[i] - (1.0 / 100.0) * change;
+				newTheta[i] = theta[i] - (1.0 / 200.0) * change;
 				// System.out.println(i + " " + change);
 				// if (Math.abs(change) > highest)
 				// highest = Math.abs(change);
 			}
+			//System.out.println("\n" + getHx(test[0]));
 			theta = newTheta;
-			System.out.println(theta[1] + " " + getCost(1));
-			// System.out.println("\n" + getHx(test[0]));
+			System.out.println(theta[10] + " " + getCost(10));
+			//System.out.println("\n" + getHx(test[0]));
 			highest++;
 			iterations++;
-		} while (highest < 200);
+		} while (highest < 750);
 
-		result = 1 / (1 + Math.pow(Math.E, -(dotProduct(theta, test[3]))));
-		System.out.println("\n" + getHx(test[2]));
-		System.out.println("\n" + getHx(test[3]));
-		System.out.println("\n" + getHx(test[4]));
-		System.out.println("\n" + getHx(test[5]));
+		//result = 1 / (1 + Math.pow(Math.E, -(dotProduct(theta, test[3]))));
+//		System.out.println("\n" + getHx(test[2]));
+//		System.out.println("\n" + getHx(test[3]));
+//		System.out.println("\n" + getHx(test[4]));
+//		System.out.println("\n" + getHx(test[5]));
 		
 		// for(double[] a : matrix){
 		// for(double b : a)
@@ -168,7 +169,7 @@ public class CustomClassifier extends Classifier {
 				double hx = getHx(featureValues[i]);
 				double y = truth[i][0];
 				// System.out.println(hx + " " + y);
-				sum += (y - hx);
+				sum += (hx - y);
 			}
 		}
 
@@ -177,10 +178,12 @@ public class CustomClassifier extends Classifier {
 			for (int i = 0; i < m; i++) {
 				double hx = getHx(featureValues[i]);
 				double y = truth[i][0];
-				//System.out.println(hx + " " + y);
-				sum += (y - hx) * featureValues[i][xi];
+				//if (xi == 0 && i == 0) System.out.println(hx + " " + y);
+				sum += (hx - y) * featureValues[i][xi];
 			}
 		}
+		
+		//if (xi == 0) System.out.println(sum);
 
 		return sum / m;
 	}
@@ -201,6 +204,29 @@ public class CustomClassifier extends Classifier {
 
 	@Override
 	public void makePredictions(String testDataFilepath) {
+		
+		Scanner file = readFile(testDataFilepath);
+
+//		for (double[] b : truth)
+//			System.out.print(b[0] + " ");
+//		System.out.println();
+		
+		int count = 1;
+
+		while (file.hasNextLine()) {
+			String[] line = file.nextLine().split("\\s+");
+
+			DataSet data = new DataSet(line, features, null);
+			double[] values = data.matrix;
+
+			double hx = getHx(values);
+			
+			// System.out.print(p0 + " " + p1 + " ");
+
+			String out = hx < 0.5 ? output[0] : output[1];
+			System.out.println(count + " " + out);
+			count++;
+		}
 
 	}
 
