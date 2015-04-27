@@ -6,16 +6,18 @@ public class FeatureHeader {
 	String name;
 	private boolean numeric;
 	String[] values;
-	double[] probabilities;
+	double[][] probabilities;
 	
 	public FeatureHeader(String[] data) {
 		this.name = data[0];
 		if (data[1].equals("numeric")) {
 			this.numeric = true;
 			this.values = null;
+			this.probabilities = null;
 		} else {
 			this.numeric = false;
 			this.values = new String[data.length-1];
+			this.probabilities = new double[2][data.length-1];
 			for(int i = 1; i < data.length; i++){
 				this.values[i-1] = data[i];
 			}
