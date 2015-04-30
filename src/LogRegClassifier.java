@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import Jama.Matrix;
@@ -12,9 +11,12 @@ public class LogRegClassifier extends Classifier {
 	private String[] output;
 	private ArrayList<FeatureHeader> features;
 	private ArrayList<ArrayList<DataSet>> data;
-	private double[][] theta;
+	private double[] theta;
 	private double[][] featureValues;
+	private double[][] featureValues0;
+	private double[][] featureValues1;
 	private double[][] truth;
+	private double output0P;
 
 	public LogRegClassifier(String namesFilepath) {
 		super(namesFilepath);
@@ -31,8 +33,6 @@ public class LogRegClassifier extends Classifier {
 			String[] data = file.nextLine().split("\\s+");
 			features.add(new FeatureHeader(data));
 		}
-		// for(FeatureHeader feature : features)
-		// System.out.println(feature);
 	}
 
 	@Override
@@ -52,6 +52,9 @@ public class LogRegClassifier extends Classifier {
 		int rows1 = this.data.get(1).size();
 		int cols = this.features.size();
 
+		featureValues0 = new double[rows0][cols + 1];
+		featureValues1 = new double[rows1][cols + 1];
+
 		featureValues = new double[rows0 + rows1][cols + 1];
 		truth = new double[rows0 + rows1][1];
 
@@ -64,12 +67,18 @@ public class LogRegClassifier extends Classifier {
 			featureValues[i + rows0] = this.data.get(1).get(i).matrix;
 			truth[i + rows0] = this.data.get(1).get(i).outputIndex;
 		}
-
-		// for(double[] row : featureValues){
-		// for(double v : row)
-		// System.out.print(v + " ");
-		// System.out.println();
-		// }
+		
+		
+		for (double[] row : featureValues) {
+			for (int i = 0; i < cols; i++) {
+				if (!features.get(i).isNumeric()) {
+					features.get(i).probabilities[0][(int) row[i + 1] - 1] = findProbability(
+							i, row[i + 1], 0);
+					features.get(i).probabilities[1][(int) row[i + 1] - 1] = findProbability(
+							i, row[i + 1], 1);
+				}
+			}
+		}
 
 		Matrix X = new Matrix(featureValues);
 		Matrix Y = new Matrix(truth);
@@ -77,141 +86,113 @@ public class LogRegClassifier extends Classifier {
 		Matrix thetaMatrix = ((X.transpose().times(X)).inverse().times(X
 				.transpose().times(Y)));
 
-
-		theta = new double[thetaMatrix.getArray().length][];
-		theta[0] = new double[]{thetaMatrix.getArray()[0][0]};
-		//System.out.println(theta[0][0]);
-		for (int index = 1; index < thetaMatrix.getArray().length; index++) {
-			for (double b : thetaMatrix.getArray()[index]) {
-				if(features.get(index-1).isNumeric())
-					theta[index] = new double[]{b};
-				else{
-					//System.out.println(features.get(index).values.length);
-					theta[index] = new double[features.get(index-1).values.length];
-					Arrays.fill(theta[index], b);
-				}
-				// System.out.print(b + " ");
+		theta = new double[thetaMatrix.getArray().length];
+		int index = 0;
+		for (double[] a : thetaMatrix.getArray()) {
+			for (double b : a) {
+				theta[index] = b;
+				index++;
 			}
-			// System.out.println();
 		}
 
-		double highest = 0;
-
-		// for (double f : featureValues[1])
-		// System.out.print(f + ", ");
-		
 		int iterations = 1;
 		do {
-			double[][] newTheta = new double[theta.length][];
+			double[] newTheta = new double[theta.length];
 			for (int i = 0; i < theta.length; i++) {
-				newTheta[i] = new double[theta[i].length];
-				for(int j = 0; j < theta[i].length; j++){
-					double change = getChange(i, j);
-					//System.out.println(change);
-					//System.out.println(i + " " + j);
-					newTheta[i][j] = theta[i][j] - (0.1) * change;
-				// System.out.println(i + " " + change);
-				// if (Math.abs(change) > highest)
-				// highest = Math.abs(change);
-				//System.out.print(getCost(i) + " ");
-				}
+				double change = getChange(i);
+				newTheta[i] = theta[i] - (0.1) * change;
 			}
-			//System.out.println();
-			// System.out.println("\n" + getHx(test[0]));
 			theta = newTheta;
-			//System.out.println("theta2: " + theta[2][0] + " ");
-			// System.out.println("\n" + getHx(test[0]));
-			//System.out.println(theta[10][0]);
-			highest++;
 			iterations++;
-		} while (highest < 1200);
-
-
+		} while (iterations < 2000);
 
 	}
+	
+	public double[] getMeanVariance(int index, int output) {
+		double[] data = new double[2];
+		data[0] = 0;
+		data[1] = 0;
+		int total = 0;
 
-	public double getCost() {
-		double sum = 0;
-		double m = featureValues.length;;
+		double[][] values = output == 0 ? featureValues0 : featureValues1;
 
-		for (int i = 0; i < m; i++) {
-			double hx = getHx(featureValues[i]);
-			double y = truth[i][0];
-			// if (xi == 0 && i == 0) System.out.println(hx + " " + y);
-			// System.out.println(hx+ " " + y + " ");
-			if (hx != 0 && hx != 1){
-				sum += ((-y * Math.log(hx)) - ((1 - y)
-						* Math.log(1 - hx)));
-			}
+		for (double[] row : values) {
+			data[0] += row[index];
+			total++;
 		}
 
-		return sum / m;
+		data[0] /= total;
+
+		for (double[] row : values)
+			data[1] += Math.pow(row[index] - data[0], 2);
+
+		data[1] /= total;
+		return data;
+	}
+
+	public double findProbability(int index, double value, int output) {
+
+		int total = 0;
+		// Adding 1 as smoothing factor so Jl is just j
+		int j = features.get(index).values.length;
+		double[][] values = output == 0 ? featureValues0 : featureValues1;
+
+		for (double[] row : values) {
+			if (row[index + 1] == value)
+				total++;
+		}
+
+		return (double) (total + 1)
+				/ (double) (this.data.get(output).size() + j);
+
+	}
+	
+	public double calculateProbability(int i, double value, int output) {
+		if (features.get(i).isNumeric()) {
+			double[] mv = getMeanVariance(i + 1, output);
+			// System.out.print("mean: " + mv[0] + " variance: " + mv[1]);
+			double pow = -(Math.pow(value - mv[0], 2)) / (2 * mv[1]);
+			double prob = (Math.pow(1, pow) / Math.sqrt((2 * Math.PI * mv[1])));
+			// System.out.println(" " + prob);
+			return prob;
+		}
+
+		return features.get(i).probabilities[output][(int) value - 1];
+		// return findProbability(i, value, output);
 
 	}
 
-	// Give feature array and feature output
-	public double getChange(int xi, int xj) {
+	public double getChange(int xi) {
 		// number of training values
-		double m = 0;
+		double m = featureValues.length;
 		double sum = 0;
 
 		if (xi == 0) {
-			for (int i = 0; i < featureValues.length; i++) {
+			for (int i = 0; i < m; i++) {
 				double hx = getHx(featureValues[i]);
 				double y = truth[i][0];
-				//System.out.println("hx: " + hx + " " + y);
 				sum += (hx - y);
-				m++;
 			}
 		}
 
 		else {
-			//xi -= 1;
-			for (int i = 0; i < featureValues.length; i++) {			
-				//System.out.println(featureValues[i][0]);
+			for (int i = 0; i < m; i++) {
 				double hx = getHx(featureValues[i]);
 				double y = truth[i][0];
-				//if (xi == 1 && i == 0) System.out.println(hx + " " + y);
-				if(features.get(xi-1).isNumeric() || featureValues[i][xi] == xj + 1){
-					sum += (hx - y) * featureValues[i][xi];
-					m++;
-				}
-				
+				sum += (hx - y) * featureValues[i][xi];
 			}
 		}
-
-		// if (xi == 0) System.out.println(sum);
-
 		return sum / m;
 	}
 
 	public double getHx(double[] x) {
-		//System.out.println("dot: " + (dotProduct(getTheta(x), x)));
-		return 1 / (1 + Math.pow(Math.E, -1*(dotProduct(getTheta(x), x))));
-	}
-	
-	public double[] getTheta(double[] x){
-		double[] ret = new double[theta.length];
-		ret[0] = theta[0][0];
-		//System.out.print("ret: " + theta[0][0] + " ");
-		for(int i = 1; i < theta.length; i++){
-			if(features.get(i-1).isNumeric())
-				ret[i] = theta[i][0];
-			else
-				ret[i] = theta[i][(int)x[i]-1];	
-		}
-		//System.out.println(ret[1] + " " + ret[2]);
-		return ret;
+		return 1 / (1 + Math.pow(Math.E, -1 * (dotProduct(theta, x))));
 	}
 
 	public double dotProduct(double[] v1, double[] v2) {
-		// if (v1.length - 1 != v2.length)
-		// return 0;
 		double sum = 0;
-		for (int i = 0; i < v2.length; i++){
-			//System.out.println("summing: " + v1[i] + " " + v2[i]);
+		for (int i = 0; i < v2.length; i++)
 			sum += (v1[i] * v2[i]);
-		}
 		return sum;
 	}
 
@@ -219,10 +200,6 @@ public class LogRegClassifier extends Classifier {
 	public void makePredictions(String testDataFilepath) {
 
 		Scanner file = readFile(testDataFilepath);
-
-		// for (double[] b : truth)
-		// System.out.print(b[0] + " ");
-		// System.out.println();
 
 		int count = 1;
 		int correct = 0;
@@ -232,14 +209,20 @@ public class LogRegClassifier extends Classifier {
 
 			DataSet data = new DataSet(line, features, null);
 			double[] values = data.matrix;
+			
+			double p0 = output0P;
+			double p1 = 1 - output0P;
+
+			for (int i = 0; i < features.size(); i++) {
+				p0 *= calculateProbability(i, values[i + 1], 0);
+				p1 *= calculateProbability(i, values[i + 1], 1);
+			}
+
 
 			double hx = getHx(values);
-			
-			//System.out.println(hx);
 
-			// System.out.print(p0 + " " + p1 + " ");
-			String out = hx < 0.5 ? output[0] : output[1];
-			//System.out.println(count + " " + out);
+			String out = (hx < 0.5) ? output[0] : output[1];
+			// System.out.println(count + " " + out);
 			if (out.equals(data.output))
 				correct++;
 			count++;
@@ -258,22 +241,6 @@ public class LogRegClassifier extends Classifier {
 			s = null;
 		}
 		return s;
-	}
-
-	public void generateOutput() {
-		PrintWriter writer;
-		try {
-			writer = new PrintWriter("output.txt");
-			for (int i = 0; i < output.length; i++) {
-				writer.println(output[i]);
-				for (DataSet d : data.get(i))
-					writer.println(d);
-				writer.println("\n");
-			}
-			writer.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 
 }

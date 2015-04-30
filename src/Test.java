@@ -7,7 +7,7 @@ public class Test {
 		//RandomClassifier tester = new RandomClassifier("trainingData/census.names");
 		//LogRegClassifier tester = new LogRegClassifier("trainingData/census.names");
 		BayesClassifier tester = new BayesClassifier("trainingData/census.names");
-		//Combination tester = new Combination("trainingData/census.names");
+		//LogRegClassifier2 tester = new LogRegClassifier2("trainingData/census.names");
 		tester.train("trainingData/census.train");
 		//for(int i = 0; i < 100; i++)
 			tester.makePredictions("trainingData/census.train");
