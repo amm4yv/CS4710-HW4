@@ -10,7 +10,7 @@ public class Test {
 		//LogRegClassifier2 tester = new LogRegClassifier2("trainingData/census.names");
 		tester.train("trainingData/census.train");
 		//for(int i = 0; i < 100; i++)
-			tester.makePredictions("trainingData/census.train");
+			tester.makePredictions("trainingData/censusShort.train");
 	}
 	
 }

@@ -68,12 +68,6 @@ public class BayesClassifier extends Classifier {
 			featureValues1[i] = this.data.get(1).get(i).matrix;
 		}
 
-		// for(double[] b : truth)
-		// System.out.print(b[0] + " ");
-		// System.out.println();
-
-		// probability0 = new HashMap[cols];
-		// probability1 = new HashMap[cols];
 
 		for (double[] row : featureValues) {
 			for (int i = 0; i < cols; i++) {
@@ -86,16 +80,6 @@ public class BayesClassifier extends Classifier {
 			}
 		}
 
-		// for (double[] row : featureValues) {
-		// for (int i = 0; i < cols; i++) {
-		// if (!features.get(i).isNumeric()){
-		// if (probability0[i].get(row[i]) == null)
-		// findProbability(i, row[i], 0);
-		// if (probability1[i].get(row[i]) == null)
-		// findProbability(i, row[i], 1);
-		// }
-		// }
-		// }
 
 		testAndTrain("trainingData/censusShort.train");
 
@@ -200,13 +184,13 @@ public class BayesClassifier extends Classifier {
 			// System.out.print(p0 + " " + p1 + " ");
 
 			String out = p0 > p1 ? output[0] : output[1];
-			System.out.println(count + " " + out);
+			System.out.println(out);
 			if (out.equals(data.output))
 				correct++;
 			count++;
 		}
 
-		System.out.println((double) correct / (count - 1));
+		//System.out.println((double) correct / (count - 1));
 
 	}
 

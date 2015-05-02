@@ -124,7 +124,7 @@ public class LogRegClassifier2 extends Classifier {
 			//System.out.println(theta[10][0]);
 			highest++;
 			iterations++;
-		} while (highest < 1200);
+		} while (highest < 1000);
 
 
 
@@ -239,13 +239,13 @@ public class LogRegClassifier2 extends Classifier {
 
 			// System.out.print(p0 + " " + p1 + " ");
 			String out = hx < 0.5 ? output[0] : output[1];
-			//System.out.println(count + " " + out);
+			System.out.println(out);
 			if (out.equals(data.output))
 				correct++;
 			count++;
 		}
 
-		System.out.println((double) correct / (count - 1));
+		//System.out.println((double) correct / (count - 1));
 
 	}
 

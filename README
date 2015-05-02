@@ -1,0 +1,8 @@
+Allison Moyer amm4yv
+Scott Mallory sam4ku
+CS4710 - Classifier
+
+All of our classifiers use the two helper classes, FeatureHeader.java and DataSet.java.
+The modified training data files are used in our implementation under the trainingData folder,
+so, to run please pass "trainingData/census.train" to our classifier.
+We would like the Naive Bayes (BayesClassifier.java) to be entered into the competition.

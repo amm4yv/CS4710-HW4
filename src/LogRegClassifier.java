@@ -222,13 +222,13 @@ public class LogRegClassifier extends Classifier {
 			double hx = getHx(values);
 
 			String out = (hx < 0.5) ? output[0] : output[1];
-			// System.out.println(count + " " + out);
+			System.out.println(out);
 			if (out.equals(data.output))
 				correct++;
 			count++;
 		}
 
-		System.out.println((double) correct / (count - 1));
+		//System.out.println((double) correct / (count - 1));
 
 	}
 
